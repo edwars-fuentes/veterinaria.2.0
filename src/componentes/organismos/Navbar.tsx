@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Navbar() {
+    const location = useLocation();
+
     return (
         <nav className="navbar navbar-expand navbar-dark bg-success">
             {/* Cambia "container" por "container-fluid" y añade padding lateral opcional (px-4) */}
@@ -17,20 +19,50 @@ function Navbar() {
                 </Link>
 
                 <div className="navbar-nav">
+                    {location.pathname === "/" && (
+                    <Link className="nav-link text-white" to="/Registro">
+                        <i className="fa-solid fa-user"></i>
+                        <span>Registro</span>
+                    </Link>
+                    )}
+
+                    {location.pathname === "/InicioUsuario" && (
+                    <Link className="nav-link text-white d-flex align-items-center gap-1" to="/InicioUsuario">
+                        <i className="fa-solid fa-house"></i>
+                        <span>Inicio</span>
+                    </Link>                       
+                    )}
+                    {location.pathname === "/" && (
                     <Link className="nav-link text-white d-flex align-items-center gap-1" to="/">
                         <i className="fa-solid fa-house"></i>
                         <span>Inicio</span>
                     </Link>
+                    )}
+                    {location.pathname === "/Mascotas" && (
+                    <Link className="nav-link text-white d-flex align-items-center gap-1" to="/InicioUsuario">
+                        <i className="fa-solid fa-house"></i>
+                        <span>Inicio</span>
+                    </Link>
+                    )}
+                    {location.pathname === "/Contacto" && (
+                    <Link className="nav-link text-white d-flex align-items-center gap-1" to="/InicioUsuario">
+                        <i className="fa-solid fa-house"></i>
+                        <span>Inicio</span>
+                    </Link>
+                    )}
 
                     <Link className="nav-link text-white" to="/Mascotas">
                         <i className="fa-solid fa-dog"></i>
                         <span>mascotas</span>
                     </Link>
 
-                    <Link className="nav-link text-white" to="/Contacto">
-                        <i className="fa-solid fa-phone"></i>
-                        <span>Contacto</span>
-                    </Link>
+                    {/* El enlace de Contacto solo se muestra si la ruta actual es /inicio-usuario */}
+                    {location.pathname === "/InicioUsuario" && (
+                        <Link className="nav-link text-white" to="/Contacto">
+                            <i className="fa-solid fa-phone"></i>
+                            <span>Contacto</span>
+                        </Link>
+                    )}
                 </div>
             </div>
         </nav>

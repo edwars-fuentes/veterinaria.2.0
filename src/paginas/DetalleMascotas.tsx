@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Mascotas = [
     {
@@ -67,12 +68,20 @@ function DetalleMascotas() {
                         style={{ maxHeight: '400px', objectFit: 'cover' }}
                     />
                 </div>
-
                 {/* Columna derecha: Texto e Información */}
                 <div className="col-12 col-md-6">
-                    <h2 className="text-capitalize fw-bold mb-3">{Mascota.titulo}</h2>
-                    <p className="lead">{Mascota.descripcion}</p>
-                    <h3 className="text-success fw-bold mt-4">${Mascota.precio}</h3>
+                    <div className="bg-white p-4 rounded shadow">
+                        <h2 className="text-capitalize fw-bold mb-3">{Mascota.titulo}</h2>
+                        <p className="lead">{Mascota.descripcion}</p>
+                        <h3 className="text-success fw-bold mt-4">${Mascota.precio}</h3>
+                    </div>
+                    <br />
+                    <button type="submit" className="btn btn-success">
+                        <Link className="nav-link text-white" to="/Registro">
+                            <i className="fa-solid fa-bag-shopping"></i>
+                            <span>Comprar</span>
+                        </Link>
+                    </button>
                 </div>
             </div>
         </div>

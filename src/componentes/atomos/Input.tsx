@@ -1,9 +1,9 @@
 type Props = {
     tipo: string;
     nombre: string;
-    valor: string;
-    placeholder: string;
-    alCambiar: (valor: string) => void;
+    valor?: string;
+    placeholder?: string;
+    alCambiar?: (valor: string) => void;
 };
 
 function Input({ tipo, nombre, valor, placeholder, alCambiar }: Props) {
@@ -14,7 +14,7 @@ function Input({ tipo, nombre, valor, placeholder, alCambiar }: Props) {
             className="form-control"
             value={valor}
             placeholder={placeholder}
-            onChange={(e) => alCambiar(e.target.value)}
+            onChange={(e) => alCambiar && alCambiar(e.target.value)}
         />
     );
 }
