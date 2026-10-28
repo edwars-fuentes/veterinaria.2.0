@@ -1,55 +1,79 @@
 
 import { useState } from "react";
+import type { FormEvent } from "react";
 import CampoRegistro from "../moleculas/CampoRegistro";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+type Usuario = {
+    nombre: string;
+    correo: string;
+    contrasena: string;
+};
 
 function FormularioRegistro() {
     const navigate = useNavigate();
 
     const [nombre, setNombre] = useState("");
     const [correo, setCorreo] = useState("");
-    const [contraseña, setContraseña] = useState("");
+    const [contrasena, setContrasena] = useState("");
 
-    const manejarEnvio = (e: React.FormEvent<HTMLFormElement>) => {
+    const manejarEnvio = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        const correoNormalizado = correo.trim().toLowerCase();
 
         if (nombre.trim() === "") {
             alert("Debe ingresar su nombre");
             return;
         }
 
-        if (correo.trim() === "") {
-            alert("Debe ingresar su correo");
-            return;
-        }
-
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoNormalizado)) {
             alert("Ingrese un correo válido");
             return;
         }
 
-        if (contraseña.trim() === "") {
-            alert("Debe ingresar una contraseña");
+        if (contrasena.length < 8) {
+            alert("La contraseña debe tener al menos 8 caracteres");
             return;
         }
 
-        // Guardar solo los datos no sensibles del usuario
-        const nuevoUsuario = {
-            nombre,
-            correo
-        };
+        let usuarios: Usuario[] = [];
 
-        localStorage.setItem(
-            "usuarioLogueado",
-            JSON.stringify(nuevoUsuario)
+        try {
+            usuarios = JSON.parse(
+                localStorage.getItem("usuarios") || "[]"
+            );
+        } catch {
+            alert("No se pudieron leer los usuarios guardados.");
+            return;
+        }
+
+        const existe = usuarios.some(
+            (usuario) => usuario.correo === correoNormalizado
         );
 
-        // Estado temporal para la navegación de la interfaz
-        localStorage.setItem("sesionActiva", "true");
+        if (existe) {
+            alert("Este correo ya está registrado. Inicie sesión.");
+            return;
+        }
 
-        alert("Formulario enviado correctamente");
+        const nuevoUsuario: Usuario = {
+            nombre: nombre.trim(),
+            correo: correoNormalizado,
+            contrasena
+        };
 
-        navigate("/InicioUsuario");
+        usuarios.push(nuevoUsuario);
+
+        try {
+            localStorage.setItem("usuarios", JSON.stringify(usuarios));
+        } catch {
+            alert("No se pudieron guardar los datos en este navegador.");
+            return;
+        }
+
+        alert("¡Registro exitoso! Ahora puede iniciar sesión.");
+        navigate("/Login");
     };
 
     return (
@@ -73,9 +97,9 @@ function FormularioRegistro() {
             <CampoRegistro
                 estiqueta="Contraseña"
                 tipo="password"
-                nombre="contraseña"
-                valor={contraseña}
-                alCambiar={setContraseña}
+                nombre="contrasena"
+                valor={contrasena}
+                alCambiar={setContrasena}
             />
 
             <br />
@@ -83,6 +107,10 @@ function FormularioRegistro() {
             <button type="submit" className="btn btn-success">
                 Registrarse
             </button>
+
+            <Link to="/Login" className="btn btn-outline-success ms-2">
+                Iniciar sesión
+            </Link>
         </form>
     );
 }

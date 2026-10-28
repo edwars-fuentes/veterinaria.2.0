@@ -1,19 +1,19 @@
 
 function Carrusel() {
-    const imagenes = [
-        {
-            src: "/img/veterinaria1.jpg",
-            alt: "Atención veterinaria"
-        },
-        {
-            src: "/img/veterinaria2.jpg",
-            alt: "Cuidado de mascotas"
-        },
-        {
-            src: "/img/veterinaria3.jpg",
-            alt: "Bienestar animal"
-        }
-    ];
+const imagenes = [
+    {
+        src: "/img/veterinaria1.jpg",
+        alt: "Atención veterinaria"
+    },
+    {
+        src: "/img/veterinaria2.avif",
+        alt: "Cuidado de mascotas"
+    },
+    {
+        src: "/img/veterinaria3.avif",
+        alt: "Bienestar animal"
+    }
+];
 
     return (
         <div

@@ -8,6 +8,10 @@ import Contacto from './paginas/Contacto'
 import Registro from './paginas/Registro'
 import InicioUsuario from './paginas/InicioUsuario'
 import CuentaUsuario from './paginas/CuentaUsuario'
+import Login from './paginas/Login'
+import PanelOficinista from './componentes/organismos/PanelOficinista'
+import PanelAdmin from './componentes/organismos/PanelAdmin'
+import Carrito from './paginas/Carrito'
 
 function App() {
   return(
@@ -41,6 +45,22 @@ function App() {
           <Route
           path="/Registro"
           element={<Registro/>}
+        />
+          <Route
+          path="/Login"
+          element={<Login/>}
+        />
+          <Route
+          path="/PanelOficinista"
+          element={<PanelOficinista/>}
+        />
+          <Route
+          path="/PanelAdmin"
+          element={<PanelAdmin/>}
+        />
+          <Route
+          path="/Carrito"
+          element={<Carrito/>}
         />
       </Routes>   
     </>

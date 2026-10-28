@@ -50,18 +50,35 @@ function Navbar() {
                         <span>Inicio</span>
                     </Link>
                     )}
-
-                    <Link className="nav-link text-white" to="/Mascotas">
-                        <i className="fa-solid fa-dog"></i>
-                        <span>mascotas</span>
+                    {location.pathname === "/CuentaUsuario" && (
+                    <Link className="nav-link text-white d-flex align-items-center gap-1" to="/InicioUsuario">
+                        <i className="fa-solid fa-house"></i>
+                        <span>Inicio</span>
                     </Link>
-
+                    )}
+                    {location.pathname === "/InicioUsuario" && (
+                        <Link className="nav-link text-white" to="/Mascotas">
+                        <i className="fa-solid fa-dog"></i>
+                        mascotas
+                        </Link>
+                    )}
                     {/* El enlace de Contacto solo se muestra si la ruta actual es /inicio-usuario */}
                     {location.pathname === "/InicioUsuario" && (
                         <Link className="nav-link text-white" to="/Contacto">
                             <i className="fa-solid fa-phone"></i>
                             <span>Contacto</span>
                         </Link>
+                    )}
+                    {location.pathname === "/InicioUsuario" && (
+                    <Link className="nav-link text-white" to="/CuentaUsuario">
+                        <i className="fa-solid fa-user"></i>
+                        <span>Cuenta</span>
+                    </Link>
+                    )}
+                    {location.pathname === "/InicioUsuario" && (
+                    <Link className="nav-link text-white" to="/Carrito">
+                        <i className="fa-solid fa-cart-shopping"></i>
+                    </Link>
                     )}
                 </div>
             </div>

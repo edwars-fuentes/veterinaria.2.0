@@ -1,6 +1,14 @@
 import { useState } from "react";
 import CampoFormulario from "../moleculas/CampoFormulario";
 
+// Definimos el tipo de datos para el reclamo
+type Reclamo = {
+    id: string;
+    usuario: string; // Correo de quien envía
+    mensaje: string;
+    fecha: string;
+};
+
 function FormularioContacto() {
     const [nombre, setNombre] = useState("");
     const [correo, setCorreo] = useState("");
@@ -25,7 +33,30 @@ function FormularioContacto() {
             alert("Debe ingresar un mensaje");
             return;
         }
-        alert("Formulario enviado correctamente");
+
+        // 1. Obtenemos el historial de reclamos que ya existen en el Administrador
+        const reclamosExistentes: Reclamo[] = JSON.parse(
+            localStorage.getItem("reclamos") || "[]"
+        );
+
+        // 2. Creamos el nuevo objeto de reclamo adaptado al PanelAdmin
+        const nuevoReclamo: Reclamo = {
+            id: `REC-${Math.floor(1000 + Math.random() * 9000)}`, // ID aleatorio único
+            usuario: correo.trim().toLowerCase(), // Registramos el correo de contacto
+            mensaje: mensaje.trim(),
+            fecha: new Date().toLocaleDateString() // Fecha en formato legible (DD/MM/AAAA)
+        };
+
+        // 3. Lo añadimos a la lista y actualizamos el localStorage global
+        reclamosExistentes.push(nuevoReclamo);
+        localStorage.setItem("reclamos", JSON.stringify(reclamosExistentes));
+
+        // 4. Limpiamos los campos del formulario tras un envío exitoso
+        setNombre("");
+        setCorreo("");
+        setMensaje("");
+
+        alert("Formulario enviado correctamente. Su reclamo ha sido registrado por el administrador.");
     };
 
     return (

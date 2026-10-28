@@ -1,0 +1,92 @@
+
+/* Contenedor del acordeón */
+.acordeon-contenedor {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 20px auto !important;
+    font-size: 16px !important;
+    display: block !important;
+}
+
+/* Cada elemento */
+.acordeon-item {
+    margin-bottom: 8px !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    background-color: #ffffff !important;
+    display: block !important;
+}
+
+/* Encabezado verde */
+.acordeon-titulo {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 12px 16px !important;
+    background-color: #198754 !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    list-style: none !important;
+    height: auto !important;
+    min-height: 44px !important;
+    max-height: 60px !important;
+    box-sizing: border-box !important;
+    transition: background-color 0.2s ease !important;
+}
+
+/* Color al pasar el cursor */
+.acordeon-titulo:hover {
+    background-color: #157347 !important;
+}
+
+/* Color del encabezado cuando está abierto */
+.acordeon-item[open] .acordeon-titulo {
+    background-color: #146c43 !important;
+}
+
+/* Ocultar la flecha nativa del navegador */
+.acordeon-titulo::-webkit-details-marker,
+.acordeon-titulo::marker {
+    display: none !important;
+}
+
+/* Texto del encabezado */
+.acordeon-texto {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    color: #ffffff !important;
+}
+
+/* Flecha personalizada */
+.acordeon-flecha {
+    all: unset !important;
+    display: inline-block !important;
+    flex-shrink: 0 !important;
+    font-size: 14px !important;
+    width: 14px !important;
+    height: 14px !important;
+    line-height: 14px !important;
+    color: #ffffff !important;
+    text-align: center !important;
+    transition: transform 0.2s ease !important;
+}
+
+/* Rotación de la flecha al abrir */
+.acordeon-item[open] .acordeon-flecha {
+    transform: rotate(180deg) !important;
+}
+
+/* Contenido interior */
+.acordeon-contenido {
+    padding: 14px 16px !important;
+    border-top: 1px solid #dee2e6 !important;
+    background-color: #f8faf8 !important;
+    color: #212529 !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+}
