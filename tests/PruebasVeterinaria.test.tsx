@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { render, fireEvent, screen, cleanup } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 import Boton from "../src/componentes/atomos/Boton";
@@ -8,7 +8,7 @@ import FormularioContacto from "../src/componentes/organismos/FormularioContacto
 import FormularioRegistro from "../src/componentes/organismos/FormularioRegistro";
 import FormularioLogin from "../src/componentes/organismos/FormularioLogin";
 
-describe("Pruebas unitarias interesantes del proyecto", () => {
+describe("Pruebas veterinarias", () => {
   beforeEach(() => {
     localStorage.clear();
   });
@@ -17,295 +17,396 @@ describe("Pruebas unitarias interesantes del proyecto", () => {
     cleanup();
     localStorage.clear();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
-  it("1) Botón muestra el texto Ver detalle", () => {
+  it("muestra el texto Ver detalle", () => {
     render(
       <MemoryRouter>
         <Boton id={3} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     expect(screen.getByText("Ver detalle")).toBeTruthy();
   });
 
-  it("2) Botón apunta a la ruta correcta /Mascotas/:id", () => {
+  it("apunta a la ruta correcta", () => {
     const { container } = render(
       <MemoryRouter>
         <Boton id={7} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const link = container.querySelector("a");
-    expect(link?.getAttribute("href")).toBe("/Mascotas/7");
+    expect(container.querySelector("a")?.getAttribute("href"))
+      .toBe("/Mascotas/7");
   });
 
-  it("3) FormularioContacto alerta si el nombre está vacío", () => {
+  it("valida que el nombre del reclamo no esté vacío", () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-
     render(<FormularioContacto />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Enviar mensaje/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Enviar mensaje/i }),
+    );
 
     expect(alertSpy).toHaveBeenCalledWith("Debe ingresar su nombre");
   });
 
-  it("4) FormularioContacto alerta si el correo está vacío", () => {
+  it("valida que el correo del reclamo no esté vacío", () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-
     render(<FormularioContacto />);
 
-    const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-    fireEvent.change(nombreInput, { target: { value: "Ana" } });
+    const nombre = document.querySelector<HTMLInputElement>(
+      'input[name="nombre"]',
+    );
 
-    fireEvent.click(screen.getByRole("button", { name: /Enviar mensaje/i }));
+    fireEvent.change(nombre!, { target: { value: "Ana" } });
+    fireEvent.click(
+      screen.getByRole("button", { name: /Enviar mensaje/i }),
+    );
 
     expect(alertSpy).toHaveBeenCalledWith("Debe ingresar su correo");
   });
 
-  it("5) FormularioContacto alerta si el correo no tiene formato válido", () => {
+  it("valida el formato del correo del reclamo", () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-
     render(<FormularioContacto />);
 
-    const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
+    const nombre = document.querySelector<HTMLInputElement>(
+      'input[name="nombre"]',
+    );
+    const correo = document.querySelector<HTMLInputElement>(
+      'input[name="correo"]',
+    );
 
-    fireEvent.change(nombreInput, { target: { value: "Ana" } });
-    fireEvent.change(correoInput, { target: { value: "correo-invalido" } });
-
-    fireEvent.click(screen.getByRole("button", { name: /Enviar mensaje/i }));
+    fireEvent.change(nombre!, { target: { value: "Ana" } });
+    fireEvent.change(correo!, { target: { value: "correo-invalido" } });
+    fireEvent.click(
+      screen.getByRole("button", { name: /Enviar mensaje/i }),
+    );
 
     expect(alertSpy).toHaveBeenCalledWith("Ingrese un correo válido");
   });
 
-  it("6) FormularioContacto alerta si el mensaje está vacío", () => {
+  it("valida que el mensaje del reclamo no esté vacío", () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-
     render(<FormularioContacto />);
 
-    const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
+    const nombre = document.querySelector<HTMLInputElement>(
+      'input[name="nombre"]',
+    );
+    const correo = document.querySelector<HTMLInputElement>(
+      'input[name="correo"]',
+    );
 
-    fireEvent.change(nombreInput, { target: { value: "Ana" } });
-    fireEvent.change(correoInput, { target: { value: "ana@test.com" } });
-
-    fireEvent.click(screen.getByRole("button", { name: /Enviar mensaje/i }));
+    fireEvent.change(nombre!, { target: { value: "Ana" } });
+    fireEvent.change(correo!, { target: { value: "ana@test.com" } });
+    fireEvent.click(
+      screen.getByRole("button", { name: /Enviar mensaje/i }),
+    );
 
     expect(alertSpy).toHaveBeenCalledWith("Debe ingresar un mensaje");
   });
 
-  it("7) FormularioContacto guarda el reclamo en localStorage al enviar correctamente", () => {
+  it("guarda un reclamo válido en el respaldo local si falla el servidor", async () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("Servidor no disponible")),
+    );
 
     render(<FormularioContacto />);
 
-    const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
-    const mensajeInput = document.querySelector('input[name="mensaje"]') as HTMLInputElement;
+    const nombre = document.querySelector<HTMLInputElement>(
+      'input[name="nombre"]',
+    )!;
+    const correo = document.querySelector<HTMLInputElement>(
+      'input[name="correo"]',
+    )!;
+    const mensaje = document.querySelector<HTMLInputElement>(
+      'input[name="mensaje"]',
+    )!;
 
-    fireEvent.change(nombreInput, { target: { value: "Ana" } });
-    fireEvent.change(correoInput, { target: { value: "ana@test.com" } });
-    fireEvent.change(mensajeInput, { target: { value: "Quiero reportar un problema" } });
+    fireEvent.change(nombre, { target: { value: "Ana" } });
+    fireEvent.change(correo, { target: { value: "ana@test.com" } });
+    fireEvent.change(mensaje, {
+      target: { value: "Quiero reportar un problema" },
+    });
 
-    fireEvent.click(screen.getByRole("button", { name: /Enviar mensaje/i }));
-
-    const reclamos = JSON.parse(localStorage.getItem("reclamos") || "[]");
-    expect(Array.isArray(reclamos)).toBe(true);
-    expect(reclamos.length).toBeGreaterThan(0);
-
-    expect(alertSpy).toHaveBeenCalledWith(
-      "Formulario enviado correctamente. Su reclamo ha sido registrado por el administrador."
+    fireEvent.click(
+      screen.getByRole("button", { name: /Enviar mensaje/i }),
     );
+
+    await waitFor(() => {
+      const reclamos = JSON.parse(localStorage.getItem("reclamos") || "[]");
+
+      expect(reclamos).toHaveLength(1);
+      expect(reclamos[0]).toMatchObject({
+        usuario: "ana@test.com",
+        mensaje: "Quiero reportar un problema",
+      });
+
+      expect(nombre.value).toBe("");
+      expect(correo.value).toBe("");
+      expect(mensaje.value).toBe("");
+
+      expect(alertSpy).toHaveBeenCalledWith(
+        "Formulario enviado correctamente. Su reclamo ha sido registrado por el administrador.",
+      );
+    });
   });
 
-  it("8) FormularioContacto limpia los campos después de un envío exitoso", () => {
-    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-
-    render(<FormularioContacto />);
-
-    const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
-    const mensajeInput = document.querySelector('input[name="mensaje"]') as HTMLInputElement;
-
-    fireEvent.change(nombreInput, { target: { value: "Ana" } });
-    fireEvent.change(correoInput, { target: { value: "ana@test.com" } });
-    fireEvent.change(mensajeInput, { target: { value: "Mensaje de prueba" } });
-
-    fireEvent.click(screen.getByRole("button", { name: /Enviar mensaje/i }));
-
-    expect(nombreInput.value).toBe("");
-    expect(correoInput.value).toBe("");
-    expect(mensajeInput.value).toBe("");
-
-    expect(alertSpy).toHaveBeenCalledWith(
-      "Formulario enviado correctamente. Su reclamo ha sido registrado por el administrador."
-    );
-  });
-
-  it("9) FormularioRegistro alerta si el nombre está vacío", () => {
+  it("valida el nombre al registrarse", () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
     render(
       <MemoryRouter>
         <FormularioRegistro />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const boton = screen.getAllByRole("button", { name: /Registrarse/i })[0];
-    fireEvent.click(boton);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /Registrarse/i })[0],
+    );
 
     expect(alertSpy).toHaveBeenCalledWith("Debe ingresar su nombre");
   });
 
-  it("10) FormularioRegistro alerta si el correo no es válido", () => {
+  it("valida el correo al registrarse", () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
     render(
       <MemoryRouter>
         <FormularioRegistro />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
-    const contrasenaInput = document.querySelector('input[name="contrasena"]') as HTMLInputElement;
+    const nombre = document.querySelector<HTMLInputElement>(
+      'input[name="nombre"]',
+    );
+    const correo = document.querySelector<HTMLInputElement>(
+      'input[name="correo"]',
+    );
+    const contrasena = document.querySelector<HTMLInputElement>(
+      'input[name="contrasena"]',
+    );
 
-    fireEvent.change(nombreInput, { target: { value: "Carlos" } });
-    fireEvent.change(correoInput, { target: { value: "correo-invalido" } });
-    fireEvent.change(contrasenaInput, { target: { value: "12345678" } });
+    fireEvent.change(nombre!, { target: { value: "Carlos" } });
+    fireEvent.change(correo!, { target: { value: "correo-invalido" } });
+    fireEvent.change(contrasena!, { target: { value: "12345678" } });
 
-    const boton = screen.getAllByRole("button", { name: /Registrarse/i })[0];
-    fireEvent.click(boton);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /Registrarse/i })[0],
+    );
 
     expect(alertSpy).toHaveBeenCalledWith("Ingrese un correo válido");
   });
 
-  it("11) FormularioRegistro alerta si la contraseña tiene menos de 8 caracteres", () => {
+  it("rechaza una contraseña corta al registrarse", () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
     render(
       <MemoryRouter>
         <FormularioRegistro />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
-    const contrasenaInput = document.querySelector('input[name="contrasena"]') as HTMLInputElement;
+    const nombre = document.querySelector<HTMLInputElement>(
+      'input[name="nombre"]',
+    );
+    const correo = document.querySelector<HTMLInputElement>(
+      'input[name="correo"]',
+    );
+    const contrasena = document.querySelector<HTMLInputElement>(
+      'input[name="contrasena"]',
+    );
 
-    fireEvent.change(nombreInput, { target: { value: "Carlos" } });
-    fireEvent.change(correoInput, { target: { value: "carlos@test.com" } });
-    fireEvent.change(contrasenaInput, { target: { value: "123" } });
+    fireEvent.change(nombre!, { target: { value: "Carlos" } });
+    fireEvent.change(correo!, { target: { value: "carlos@test.com" } });
+    fireEvent.change(contrasena!, { target: { value: "123" } });
 
-    const boton = screen.getAllByRole("button", { name: /Registrarse/i })[0];
-    fireEvent.click(boton);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /Registrarse/i })[0],
+    );
 
-    expect(alertSpy).toHaveBeenCalledWith("La contraseña debe tener al menos 8 caracteres");
+    expect(alertSpy).toHaveBeenCalledWith(
+      "La contraseña debe tener al menos 8 caracteres",
+    );
   });
 
-  it("12) FormularioRegistro alerta si el correo ya está registrado", () => {
+  it("muestra el error del servidor si el correo ya está registrado", async () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
-    localStorage.setItem(
-      "usuarios",
-      JSON.stringify([{ nombre: "Ana", correo: "ana@test.com", contrasena: "12345678" }])
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: async () => ({
+          mensaje: "Este correo ya está registrado. Inicie sesión.",
+        }),
+      }),
     );
 
     render(
       <MemoryRouter>
         <FormularioRegistro />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
-    const contrasenaInput = document.querySelector('input[name="contrasena"]') as HTMLInputElement;
+    const nombre = document.querySelector<HTMLInputElement>(
+      'input[name="nombre"]',
+    );
+    const correo = document.querySelector<HTMLInputElement>(
+      'input[name="correo"]',
+    );
+    const contrasena = document.querySelector<HTMLInputElement>(
+      'input[name="contrasena"]',
+    );
 
-    fireEvent.change(nombreInput, { target: { value: "Ana" } });
-    fireEvent.change(correoInput, { target: { value: "ana@test.com" } });
-    fireEvent.change(contrasenaInput, { target: { value: "12345678" } });
+    fireEvent.change(nombre!, { target: { value: "Ana" } });
+    fireEvent.change(correo!, { target: { value: "ana@test.com" } });
+    fireEvent.change(contrasena!, { target: { value: "12345678" } });
 
-    const boton = screen.getAllByRole("button", { name: /Registrarse/i })[0];
-    fireEvent.click(boton);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /Registrarse/i })[0],
+    );
 
-    expect(alertSpy).toHaveBeenCalledWith("Este correo ya está registrado. Inicie sesión.");
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        "Este correo ya está registrado. Inicie sesión.",
+      );
+    });
   });
 
-  it("13) FormularioRegistro guarda un usuario nuevo en localStorage", () => {
+  it("envía el registro al servidor y muestra la confirmación", async () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
 
     render(
       <MemoryRouter>
         <FormularioRegistro />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
-    const contrasenaInput = document.querySelector('input[name="contrasena"]') as HTMLInputElement;
+    const nombre = document.querySelector<HTMLInputElement>(
+      'input[name="nombre"]',
+    );
+    const correo = document.querySelector<HTMLInputElement>(
+      'input[name="correo"]',
+    );
+    const contrasena = document.querySelector<HTMLInputElement>(
+      'input[name="contrasena"]',
+    );
 
-    fireEvent.change(nombreInput, { target: { value: "Luis" } });
-    fireEvent.change(correoInput, { target: { value: "luis@test.com" } });
-    fireEvent.change(contrasenaInput, { target: { value: "12345678" } });
+    fireEvent.change(nombre!, { target: { value: "Luis" } });
+    fireEvent.change(correo!, { target: { value: "luis@test.com" } });
+    fireEvent.change(contrasena!, { target: { value: "12345678" } });
 
-    const boton = screen.getAllByRole("button", { name: /Registrarse/i })[0];
-    fireEvent.click(boton);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /Registrarse/i })[0],
+    );
 
-    const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
-    expect(usuarios.some((u: any) => u.correo === "luis@test.com")).toBe(true);
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "http://localhost:8082/api/usuarios/registro",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            nombreCompleto: "Luis",
+            correo: "luis@test.com",
+            contrasena: "12345678",
+          }),
+        }),
+      );
 
-    expect(alertSpy).toHaveBeenCalledWith("¡Registro exitoso! Ahora puede iniciar sesión.");
+      expect(alertSpy).toHaveBeenCalledWith(
+        "¡Registro exitoso! Ahora puede iniciar sesión.",
+      );
+    });
   });
 
-  it("14) FormularioLogin alerta si el correo no es válido", () => {
+  it("valida el correo al iniciar sesión", () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
     render(
       <MemoryRouter>
         <FormularioLogin />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
-    const contrasenaInput = document.querySelector('input[name="contrasena"]') as HTMLInputElement;
+    const correo = document.querySelector<HTMLInputElement>(
+      'input[name="correo"]',
+    );
+    const contrasena = document.querySelector<HTMLInputElement>(
+      'input[name="contrasena"]',
+    );
 
-    fireEvent.change(correoInput, { target: { value: "correo-no-valido" } });
-    fireEvent.change(contrasenaInput, { target: { value: "12345678" } });
+    fireEvent.change(correo!, { target: { value: "correo-no-valido" } });
+    fireEvent.change(contrasena!, { target: { value: "12345678" } });
 
-    const boton = screen.getAllByRole("button", { name: /Iniciar sesión/i })[0];
-    fireEvent.click(boton);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /Iniciar sesión/i })[0],
+    );
 
     expect(alertSpy).toHaveBeenCalledWith("Debe ingresar un correo válido");
   });
 
-  it("15) FormularioLogin inicia sesión correctamente con usuario existente", () => {
+  it("inicia sesión con la respuesta exitosa del servidor", async () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
-    localStorage.setItem(
-      "usuarios",
-      JSON.stringify([{ nombre: "Edwars", correo: "edwars@test.com", contrasena: "12345678", rol: "usuario" }])
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          token: "token-de-prueba",
+          rol: "usuario",
+          correo: "edwars@test.com",
+          nombreCompleto: "Edwars",
+        }),
+      }),
     );
 
     render(
       <MemoryRouter>
         <FormularioLogin />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
-    const contrasenaInput = document.querySelector('input[name="contrasena"]') as HTMLInputElement;
+    const correo = document.querySelector<HTMLInputElement>(
+      'input[name="correo"]',
+    );
+    const contrasena = document.querySelector<HTMLInputElement>(
+      'input[name="contrasena"]',
+    );
 
-    fireEvent.change(correoInput, { target: { value: "edwars@test.com" } });
-    fireEvent.change(contrasenaInput, { target: { value: "12345678" } });
+    fireEvent.change(correo!, { target: { value: "edwars@test.com" } });
+    fireEvent.change(contrasena!, { target: { value: "12345678" } });
 
-    const boton = screen.getAllByRole("button", { name: /Iniciar sesión/i })[0];
-    fireEvent.click(boton);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /Iniciar sesión/i })[0],
+    );
 
-    const usuarioLogueado = JSON.parse(localStorage.getItem("usuarioLogueado") || "null");
-    expect(usuarioLogueado?.correo).toBe("edwars@test.com");
-    expect(usuarioLogueado?.rol).toBe("usuario");
+    await waitFor(() => {
+      const usuarioLogueado = JSON.parse(
+        localStorage.getItem("usuarioLogueado") || "null",
+      );
 
-    expect(alertSpy).toHaveBeenCalledWith("¡Bienvenido, Edwars!");
+      expect(usuarioLogueado).toMatchObject({
+        nombre: "Edwars",
+        correo: "edwars@test.com",
+        rol: "usuario",
+        token: "token-de-prueba",
+      });
+
+      expect(localStorage.getItem("token")).toBe("token-de-prueba");
+      expect(alertSpy).toHaveBeenCalledWith("¡Bienvenido, Edwars!");
+    });
   });
 });
