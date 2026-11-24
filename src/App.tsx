@@ -3,7 +3,6 @@ import './App.css'
 import Navbar from './componentes/organismos/Navbar'
 import Mascotas from './paginas/Mascotas'
 import Inicio from './paginas/Inicio'
-import DetalleMascotas from './paginas/DetalleMascotas'
 import Contacto from './paginas/Contacto'
 import Registro from './paginas/Registro'
 import InicioUsuario from './paginas/InicioUsuario'
@@ -33,10 +32,6 @@ function App() {
         <Route
           path="/Mascotas"
           element={<Mascotas/>}
-        />
-        <Route
-          path="/Mascotas/:id"
-          element={<DetalleMascotas/>}
         />
           <Route
           path="/Contacto"

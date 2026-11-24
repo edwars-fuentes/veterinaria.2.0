@@ -36,59 +36,23 @@ function Mascotas() {
             .catch(() => {});
     }, []);
 
-    const primerasCinco = mascotas.slice(0, 5);
-    const segundaFila = mascotas.slice(5, 10);
-    const restantes = mascotas.slice(10);
-
     return (
-        <div className="w-100">
-            <h1>Adopcion</h1>
+        <div className="container-fluid px-2 px-sm-3 px-md-4 py-3 overflow-x-hidden">
+            <h1 className="fs-3 fs-md-1 mb-3">Adopcion</h1>
 
-            {/* Fila 1: 5 primeras mascotas */}
-            <div className="d-flex justify-content-start gap-3 w-100 m-0 p-0">
-                {primerasCinco.map((m) => (
-                    <CardMascotas
-                        key={m.id}
-                        id={m.id}
-                        titulo={m.titulo}
-                        descripcion={m.descripcion}
-                        precio={m.precio}
-                        imagen={m.imagen}
-                    />
+            <div className="row row-cols-2 row-cols-md-3 g-2 g-md-3">
+                {mascotas.map((m) => (
+                    <div key={m.id} className="col">
+                        <CardMascotas
+                            id={m.id}
+                            titulo={m.titulo}
+                            descripcion={m.descripcion}
+                            precio={m.precio}
+                            imagen={m.imagen}
+                        />
+                    </div>
                 ))}
             </div>
-
-            {/* Fila 2: cui, perico verde, perico australiano, erizo y pez dorado */}
-            {segundaFila.length > 0 && (
-                <div className="d-flex justify-content-start gap-3 mt-3 w-100 m-0 p-0">
-                    {segundaFila.map((m) => (
-                        <CardMascotas
-                            key={m.id}
-                            id={m.id}
-                            titulo={m.titulo}
-                            descripcion={m.descripcion}
-                            precio={m.precio}
-                            imagen={m.imagen}
-                        />
-                    ))}
-                </div>
-            )}
-
-            {/* Filas siguientes si la API devuelve más de 10 */}
-            {restantes.length > 0 && (
-                <div className="d-flex flex-wrap justify-content-start gap-3 mt-3 w-100 m-0 p-0">
-                    {restantes.map((m) => (
-                        <CardMascotas
-                            key={m.id}
-                            id={m.id}
-                            titulo={m.titulo}
-                            descripcion={m.descripcion}
-                            precio={m.precio}
-                            imagen={m.imagen}
-                        />
-                    ))}
-                </div>
-            )}
         </div>
     );
 }
