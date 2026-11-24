@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS productos (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    titulo VARCHAR(150) NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    precio INT NOT NULL,
+    imagen VARCHAR(255) NOT NULL,
+    disponible BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (id)
+);

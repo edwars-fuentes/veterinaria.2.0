@@ -11,6 +11,7 @@ import Login from './paginas/Login'
 import PanelOficinista from './componentes/organismos/PanelOficinista'
 import PanelAdmin from './componentes/organismos/PanelAdmin'
 import Carrito from './paginas/Carrito'
+import ProductoMascota from './paginas/ProductoMascota'
 
 function App() {
   return(
@@ -20,6 +21,10 @@ function App() {
         <Route
           path="/"
           element={<Inicio/>}
+        />
+        <Route 
+          path="/Tienda" 
+          element={<ProductoMascota/>} 
         />
         <Route
           path="/InicioUsuario"

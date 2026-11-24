@@ -8,6 +8,7 @@ function Navbar() {
   const esRutaUsuarioLogueado = [
     "/InicioUsuario",
     "/Mascotas",
+    "/Tienda",
     "/Contacto",
     "/CuentaUsuario",
   ].includes(location.pathname);
@@ -56,6 +57,14 @@ function Navbar() {
           >
             <i className="fa-solid fa-dog"></i>
             <span>Mascotas</span>
+          </Link>
+
+          <Link
+            className="nav-link text-white d-flex align-items-center gap-2 py-2 py-md-0"
+            to="/Tienda"
+          >
+            <i className="fa-solid fa-store"></i>
+            <span>Tienda</span>
           </Link>
 
           <Link

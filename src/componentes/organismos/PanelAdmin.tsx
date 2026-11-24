@@ -29,16 +29,27 @@ type Reclamo = {
     estado?: string;
 };
 
+type ProductoAdmin = {
+    id: number | string;
+    titulo: string;
+    descripcion: string;
+    precio: number;
+    imagen: string;
+    disponible?: boolean;
+    estado: "Pendiente" | "Aprobado" | "Rechazado";
+};
+
 function PanelAdmin() {
     const navigate = useNavigate();
-    
-    // Control de la pestaña activa ("mascotas", "adopciones", "reclamos")
-    const [pestanaActiva, setPestanaActiva] = useState<"mascotas" | "adopciones" | "reclamos">("mascotas");
+
+    // Control de la pestaña activa ("mascotas", "adopciones", "reclamos", "productos")
+    const [pestanaActiva, setPestanaActiva] = useState<"mascotas" | "adopciones" | "reclamos" | "productos">("mascotas");
 
     // Estados de las bases de datos
     const [mascotas, setMascotas] = useState<MascotaRegistrada[]>([]);
     const [adopciones, setAdopciones] = useState<SolicitudAdopcion[]>([]);
     const [reclamos, setReclamos] = useState<Reclamo[]>([]);
+    const [productos, setProductos] = useState<ProductoAdmin[]>([]);
     const [respuestasDraft, setRespuestasDraft] = useState<Record<string, string>>({});
     const [enviandoRespuestaId, setEnviandoRespuestaId] = useState<string | null>(null);
 
@@ -139,11 +150,50 @@ function PanelAdmin() {
         }
     };
 
+    const cargarProductosDesdeApi = async (token: string, fallbackLocal: ProductoAdmin[]) => {
+        try {
+            const res = await fetch("http://localhost:8082/api/productos", {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+
+            if (!res.ok) {
+                setProductos(fallbackLocal.filter((p) => p.estado === "Pendiente"));
+                return;
+            }
+
+            const dataApi: Array<{
+                id: number;
+                titulo: string;
+                descripcion: string;
+                precio: number;
+                imagen: string;
+                disponible?: boolean;
+                estado?: "Pendiente" | "Aprobado" | "Rechazado";
+            }> = await res.json();
+
+            const mapeados: ProductoAdmin[] = dataApi.map((p) => ({
+                id: p.id,
+                titulo: p.titulo,
+                descripcion: p.descripcion,
+                precio: p.precio,
+                imagen: p.imagen,
+                disponible: p.disponible,
+                estado: p.estado || "Pendiente",
+            }));
+
+            localStorage.setItem("productosAdmin", JSON.stringify(mapeados));
+            setProductos(mapeados.filter((p) => p.estado === "Pendiente"));
+        } catch (error) {
+            console.error("Error al obtener productos desde la API:", error);
+            setProductos(fallbackLocal.filter((p) => p.estado === "Pendiente"));
+        }
+    };
+
     // 1. Verificar sesión de administrador y cargar datos de las colecciones
     useEffect(() => {
         const usuarioSesion = JSON.parse(localStorage.getItem("usuarioLogueado") || "{}");
         const token = usuarioSesion.token || localStorage.getItem("token");
-        
+
         // Protección de ruta estricta
         if (usuarioSesion.rol !== "admin" || !token) {
             alert("Acceso denegado. Solo administradores.");
@@ -151,10 +201,11 @@ function PanelAdmin() {
             return;
         }
 
-        // Cargar colecciones desde el localStorage (Si no existen, se inician vacías o con simulaciones)
+        // Cargar colecciones desde el localStorage
         const mascotasLocal: MascotaRegistrada[] = JSON.parse(localStorage.getItem("mascotasRegistradas") || "[]");
         const adopcionesLocal: SolicitudAdopcion[] = JSON.parse(localStorage.getItem("carritoAdopcionesGlobal") || "[]");
         const reclamosLocal: Reclamo[] = JSON.parse(localStorage.getItem("reclamos") || "[]");
+        const productosLocal: ProductoAdmin[] = JSON.parse(localStorage.getItem("productosAdmin") || "[]");
 
         setMascotas(mascotasLocal.filter((m) => m.estado === "Pendiente"));
         cargarMascotasDesdeApi(token, mascotasLocal);
@@ -162,6 +213,9 @@ function PanelAdmin() {
         setAdopciones(adopcionesLocal.filter((a) => a.estado === "Pendiente"));
         setReclamos(reclamosLocal.filter((item) => item.estado !== "Respondido" && !item.respuesta));
         cargarReclamosDesdeApi(token, reclamosLocal);
+
+        setProductos(productosLocal.filter((p) => p.estado === "Pendiente"));
+        cargarProductosDesdeApi(token, productosLocal);
     }, [navigate]);
 
     // 2. Cambiar estado de una mascota registrada (Aprobar/Rechazar) y quitarla de la lista activa
@@ -198,6 +252,42 @@ function PanelAdmin() {
         localStorage.setItem("mascotasRegistradas", JSON.stringify(actualizadasGlobal));
         setMascotas((prev) => prev.filter((_, idx) => idx !== index));
         alert(`Mascota marcada como ${nuevoEstado}`);
+    };
+
+    // 2b. Cambiar estado de un producto (Aceptar / Rechazar)
+    const cambiarEstadoProducto = async (index: number, nuevoEstado: "Aprobado" | "Rechazado") => {
+        const productoObjetivo = productos[index];
+        if (!productoObjetivo) return;
+
+        const token = obtenerToken();
+        if (productoObjetivo.id !== undefined) {
+            try {
+                await fetch(`http://localhost:8082/api/productos/${productoObjetivo.id}/estado`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado }),
+                });
+            } catch (error) {
+                console.error("Error al actualizar estado de producto en la API:", error);
+            }
+        }
+
+        const todosProductos: ProductoAdmin[] = JSON.parse(localStorage.getItem("productosAdmin") || "[]");
+        const actualizadosGlobal = todosProductos.map((p) =>
+            String(p.id) === String(productoObjetivo.id)
+                ? { ...p, estado: nuevoEstado, disponible: nuevoEstado === "Aprobado" }
+                : p
+        );
+        localStorage.setItem("productosAdmin", JSON.stringify(actualizadosGlobal));
+
+        const aprobadosTienda = actualizadosGlobal.filter((p) => p.estado === "Aprobado");
+        localStorage.setItem("productosTiendaAprobados", JSON.stringify(aprobadosTienda));
+
+        setProductos((prev) => prev.filter((_, idx) => idx !== index));
+        alert(`Producto marcado como ${nuevoEstado}`);
     };
 
     // 3. Gestionar solicitudes de adopción del carrito y quitarla al completar
@@ -281,7 +371,7 @@ function PanelAdmin() {
                             Panel de Control: Administrador
                         </h2>
                         <p className="text-muted mb-0" style={{ fontSize: "14px" }}>
-                            Supervisión global de solicitudes médicas, adopciones activas del carrito y buzón de reclamos.
+                            Supervisión global de solicitudes médicas, adopciones activas del carrito, productos y buzón de reclamos.
                         </p>
                     </div>
                     <button className="btn btn-outline-danger btn-sm px-3" onClick={manejarCerrarSesion} style={{ borderRadius: "6px", fontWeight: "500" }}>
@@ -303,6 +393,11 @@ function PanelAdmin() {
                     </span>
                 </li>
                 <li className="nav-item" style={{ cursor: "pointer" }}>
+                    <span className={`nav-link ${pestanaActiva === "productos" ? "active fw-bold text-danger" : "text-secondary"}`} onClick={() => setPestanaActiva("productos")}>
+                        Productos ({productos.length})
+                    </span>
+                </li>
+                <li className="nav-item" style={{ cursor: "pointer" }}>
                     <span className={`nav-link ${pestanaActiva === "reclamos" ? "active fw-bold text-danger" : "text-secondary"}`} onClick={() => setPestanaActiva("reclamos")}>
                         Reclamos ({reclamos.length})
                     </span>
@@ -311,7 +406,7 @@ function PanelAdmin() {
 
             {/* Contenedor dinámico según la pestaña seleccionada */}
             <div className="card shadow-sm border-0 bg-white p-4">
-                
+
                 {/* PESTAÑA 1: MASCOTAS REGISTRADAS */}
                 {pestanaActiva === "mascotas" && (
                     <div>
@@ -410,7 +505,66 @@ function PanelAdmin() {
                     </div>
                 )}
 
-                {/* PESTAÑA 3: RECLAMOS */}
+                {/* PESTAÑA 3: PRODUCTOS */}
+                {pestanaActiva === "productos" && (
+                    <div>
+                        <h5 className="text-secondary mb-3">Revisión de Productos para la Tienda</h5>
+                        {productos.length === 0 ? (
+                            <p className="text-muted my-3 text-center">No hay productos pendientes de revisión.</p>
+                        ) : (
+                            <div className="table-responsive">
+                                <table className="table table-hover align-middle">
+                                    <thead className="table-dark">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Descripción</th>
+                                            <th>Precio</th>
+                                            <th>Estado</th>
+                                            <th className="text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {productos.map((prod, idx) => (
+                                            <tr key={String(prod.id)}>
+                                                <td>
+                                                    <div className="d-flex align-items-center gap-2">
+                                                        <img
+                                                            src={prod.imagen}
+                                                            alt={prod.titulo}
+                                                            width="42"
+                                                            height="42"
+                                                            className="rounded object-fit-cover"
+                                                        />
+                                                        <strong>{prod.titulo}</strong>
+                                                    </div>
+                                                </td>
+                                                <td>{prod.descripcion}</td>
+                                                <td>${prod.precio.toLocaleString("es-CL")}</td>
+                                                <td>
+                                                    <span className={`badge ${prod.estado === "Aprobado" ? "bg-success" : prod.estado === "Rechazado" ? "bg-danger" : "bg-warning text-dark"}`}>
+                                                        {prod.estado}
+                                                    </span>
+                                                </td>
+                                                <td className="text-center">
+                                                    {prod.estado === "Pendiente" ? (
+                                                        <div className="btn-group btn-group-sm">
+                                                            <button className="btn btn-success" onClick={() => cambiarEstadoProducto(idx, "Aprobado")}>Aceptar</button>
+                                                            <button className="btn btn-danger" onClick={() => cambiarEstadoProducto(idx, "Rechazado")}>Rechazar</button>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-muted fs-7">Procesado</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* PESTAÑA 4: RECLAMOS */}
                 {pestanaActiva === "reclamos" && (
                     <div>
                         <h5 className="text-secondary mb-3">Buzón de Sugerencias y Reclamos</h5>
