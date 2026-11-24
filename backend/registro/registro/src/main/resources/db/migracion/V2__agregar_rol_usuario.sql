@@ -1,0 +1,2 @@
+ALTER TABLE usuario
+ADD COLUMN rol VARCHAR(30) NOT NULL DEFAULT 'usuario';

@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS mascotas_registradas (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(120) NOT NULL,
+    codigo VARCHAR(50) NULL,
+    razon TEXT NOT NULL,
+    dueno VARCHAR(150) NOT NULL,
+    estado VARCHAR(30) NOT NULL DEFAULT 'Pendiente',
+    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
