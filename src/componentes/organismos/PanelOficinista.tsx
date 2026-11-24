@@ -250,6 +250,7 @@ function PanelOficinista() {
                             <option value="usuario">Usuario (Cliente)</option>
                             <option value="oficinista">Oficinista</option>
                             <option value="admin">Administrador</option>
+                            <option value="trabajador">trabajador</option>
                           </select>
                         </td>
 
