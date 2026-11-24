@@ -72,4 +72,17 @@ public class UsuarioController {
                     .body(Map.of("mensaje", e.getMessage()));
         }
     }
+    @PatchMapping("/{id}/hacer-trabajador")
+    public ResponseEntity<?> convertirEnTrabajador(@PathVariable Long id) {
+        try {
+            Usuario actualizado = usuarioService.convertirEnTrabajador(id);
+            return ResponseEntity.ok(actualizado);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("mensaje", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("mensaje", e.getMessage()));
+        }
+    }
 }

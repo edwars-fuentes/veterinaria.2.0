@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
 @Service
 public class UsuarioService {
 
-    private static final List<String> ROLES_VALIDOS = List.of("usuario", "oficinista", "admin");
+    private static final List<String> ROLES_VALIDOS = List.of("usuario", "oficinista", "trabajador", "admin");
 
     private final UsuarioRepository usuarioRepository;
 
@@ -25,7 +25,7 @@ public class UsuarioService {
         }
         String rolNormalizado = rol.trim().toLowerCase();
         if (!ROLES_VALIDOS.contains(rolNormalizado)) {
-            throw new IllegalArgumentException("Rol inválido. Roles permitidos: usuario, oficinista, admin.");
+            throw new IllegalArgumentException("Rol inválido. Roles permitidos: usuario, oficinista, trabajador, admin.");
         }
         return rolNormalizado;
     }
@@ -90,5 +90,11 @@ public class UsuarioService {
             throw new NoSuchElementException("Usuario no encontrado con ID: " + id);
         }
         usuarioRepository.deleteById(id);
+    }
+
+    public Usuario convertirEnTrabajador(Long id) {
+        Usuario usuario = obtenerPorId(id);
+        usuario.setRol(normalizarRol("trabajador", false));
+        return usuarioRepository.save(usuario);
     }
 }

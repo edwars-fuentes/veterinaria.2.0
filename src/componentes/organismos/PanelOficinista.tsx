@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-type Rol = "usuario" | "oficinista" | "admin";
+type Rol = "usuario" | "oficinista" | "trabajador" | "admin";
 
 type Usuario = {
   id: number;
@@ -249,8 +249,8 @@ function PanelOficinista() {
                           >
                             <option value="usuario">Usuario (Cliente)</option>
                             <option value="oficinista">Oficinista</option>
+                            <option value="trabajador">Trabajador</option>
                             <option value="admin">Administrador</option>
-                            <option value="trabajador">trabajador</option>
                           </select>
                         </td>
 
@@ -282,6 +282,8 @@ function PanelOficinista() {
                                 ? "bg-danger"
                                 : usuario.rol === "oficinista"
                                 ? "bg-info text-dark"
+                                : usuario.rol === "trabajador"
+                                ? "bg-warning text-dark"
                                 : "bg-secondary"
                             }`}
                           >

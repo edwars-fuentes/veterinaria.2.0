@@ -8,6 +8,15 @@ function Acordeon() {
         <div className="acordeon-contenedor " >
             <details className="acordeon-item " name="accordionExample">
                 <summary className="acordeon-titulo acordeon-verde" >
+                    <span className="acordeon-texto">descripcion</span>
+                    <span className="acordeon-flecha">▼</span>
+                </summary>
+                <div className="acordeon-contenido">
+                    <div>Clínica Veterinaria San Marcos en La Cisterna, Santiago, ofrece atención veterinaria integral las 24 horas para perros, gatos y otras mascotas. Cuenta con más de 30 años de trayectoria con un enfoque centrado en el bienestar animal y el</div>
+                </div>
+            </details>
+            <details className="acordeon-item " name="accordionExample">
+                <summary className="acordeon-titulo acordeon-verde" >
                     <span className="acordeon-texto">motivacion</span>
                     <span className="acordeon-flecha">▼</span>
                 </summary>
